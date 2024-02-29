@@ -139,24 +139,24 @@ class OrthoViewer(QMainWindow):
             self.vecInteractorStyle[i].AddObserver(
                 vtk.vtkCommand.SelectionChangedEvent, self.commandSliceSelect
             )
-            # self.vecInteractorStyle[i].AddObserver(
-            #     UserCommand.StartSegmentationAdd, self.commandSegment
-            # )
-            # self.vecInteractorStyle[i].AddObserver(
-            #     UserCommand.StartSegmentationSub, self.commandSegment
-            # )
-            # self.vecInteractorStyle[i].AddObserver(
-            #     UserCommand.StopSegmentationAdd, self.commandSegment
-            # )
-            # self.vecInteractorStyle[i].AddObserver(
-            #     UserCommand.StopSegmentationSub, self.commandSegment
-            # )
-            # self.vecInteractorStyle[i].AddObserver(
-            #     UserCommand.MoveSegmentationAdd, self.commandSegment
-            # )
-            # self.vecInteractorStyle[i].AddObserver(
-            #     UserCommand.MoveSegmentationSub, self.commandSegment
-            # )
+            self.vecInteractorStyle[i].AddObserver(
+                vtk.UserCommand.StartSegmentationAdd, self.commandSegment
+            )
+            self.vecInteractorStyle[i].AddObserver(
+                vtk.UserCommand.StartSegmentationSub, self.commandSegment
+            )
+            self.vecInteractorStyle[i].AddObserver(
+                vtk.UserCommand.StopSegmentationAdd, self.commandSegment
+            )
+            self.vecInteractorStyle[i].AddObserver(
+                vtk.UserCommand.StopSegmentationSub, self.commandSegment
+            )
+            self.vecInteractorStyle[i].AddObserver(
+                vtk.UserCommand.MoveSegmentationAdd, self.commandSegment
+            )
+            self.vecInteractorStyle[i].AddObserver(
+                vtk.UserCommand.MoveSegmentationSub, self.commandSegment
+            )
             self.vecInteractorStyle[i].SegmentationModeEnabled = False
             self.segmentationList.vecInteractorStyle.append(self.vecInteractorStyle[i])
 

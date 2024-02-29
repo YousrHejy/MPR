@@ -1,21 +1,20 @@
-"""
-=========================================================================
+# """
+# =========================================================================
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+#   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
+#   All rights reserved.
+#   See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+#      This software is distributed WITHOUT ANY WARRANTY; without even
+#      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+#      PURPOSE.  See the above copyright notice for more information.
 
-=========================================================================*/
+# =========================================================================*/
 
-"""
+# """
 
 # First access the VTK module (and any other needed modules) by importing them.
 # noinspection PyUnresolvedReferences
-import vtkmodules.vtkInteractionStyle
 
 # noinspection PyUnresolvedReferences
 import vtkmodules.vtkRenderingOpenGL2
@@ -24,7 +23,6 @@ from vtkmodules.vtkFiltersSources import vtkConeSource
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
 from vtkmodules.vtkRenderingCore import (
     vtkActor,
-    vtkImageSlice,
     vtkPolyDataMapper,
     vtkRenderWindow,
     vtkRenderer,
@@ -65,7 +63,7 @@ def main(argv):
     #
     coneActor = vtkActor()
     coneActor.SetMapper(coneMapper)
-    coneActor.GetProperty().SetColor(colors.GetColor3d("MistyRose"))
+    coneActor.GetProperty().SetColor(colors.GetColor3d("Yellow"))
 
     #
     # Create two renderers and assign actors to them. A renderer renders into
@@ -75,52 +73,39 @@ def main(argv):
     # actor to two different renderers it is okay to add different actors to
     # different renderers as well.
     #
-    ren1 = vtkRenderer()
-    ren1.AddActor(coneActor)
-    ren1.SetBackground(colors.GetColor3d("Green"))
-    ren1.SetViewport(0.0, 0.5, 0.5, 1)  # (xmin, ymin, xmax, ymax) from left down
 
-    ren2 = vtkRenderer()
-    ren2.AddActor(coneActor)
-    ren2.SetBackground(colors.GetColor3d("DodgerBlue"))
-    ren2.SetViewport(0.5, 0.5, 1.0, 1.0)
+    renderers = []
+    for i in range(4):
+        ren = vtkRenderer()
+        ren.AddActor(coneActor)
+        renderers.append(ren)
 
-    ren3 = vtkRenderer()
-    ren3.AddActor(coneActor)
-    ren3.SetViewport(0.0, 0.0, 0.5, 0.5)
+    renderers[0].SetBackground(colors.GetColor3d("Green"))
+    renderers[0].SetViewport(
+        0.0, 0.5, 0.5, 1
+    )  # (xmin, ymin, xmax, ymax) from left down
 
-    ren4 = vtkRenderer()
-    ren4.AddActor(coneActor)
-    ren4.SetBackground(colors.GetColor3d("Red"))
-    ren4.SetViewport(0.5, 0, 1.0, 0.5)
+    renderers[1].SetBackground(colors.GetColor3d("DodgerBlue"))
+    renderers[1].SetViewport(0.5, 0.5, 1.0, 1.0)
+
+    renderers[2].SetViewport(0.0, 0.0, 0.5, 0.5)
+
+    renderers[3].SetBackground(colors.GetColor3d("Red"))
+    renderers[3].SetViewport(0.5, 0, 1.0, 0.5)
 
     # Finally we create the render window which will show up on the screen.
     # We put our renderer into the render window using AddRenderer. We also
     # set the size to be 300 pixels by 300.
 
     renWin = vtkRenderWindow()
-    renWin.AddRenderer(ren1)
-    renWin.AddRenderer(ren2)
-    renWin.AddRenderer(ren3)
-    renWin.AddRenderer(ren4)
+    for ren in renderers:
+        renWin.AddRenderer(ren)
     renWin.SetSize(800, 800)
     renWin.SetWindowName("Tutorial_Step3")
 
-    # Make one view 90 degrees from other.
-    #
-    ren1.ResetCamera()
-    ren1.GetActiveCamera().Azimuth(90)
+    # Render
+    renWin.Render()
 
-    #
-    # Now we loop over 360 degrees and render the cones each time.
-    #
-    for i in range(0, 360):  # render the image
-        renWin.Render()
-        # rotate the active camera by one degree
-        ren1.GetActiveCamera().Azimuth(1)
-        ren2.GetActiveCamera().Azimuth(1)
-
-    #
     # The vtkRenderWindowInteractor class watches for events (e.g., keypress,
     # mouse) in the vtkRenderWindow. These events are translated into
     # event invocations that VTK understands (see VTK/Common/vtkCommand.h
@@ -162,3 +147,122 @@ if __name__ == "__main__":
     import sys
 
     main(sys.argv)
+
+
+# import vtk
+
+
+# class CustomInteractorStyle(vtk.vtkInteractorStyleTrackballCamera):
+#     def __init__(self):
+#         self.AddObserver("LeftButtonPressEvent", self.left_button_press_event)
+
+#     def left_button_press_event(self, obj, event):
+#         # Override the default behavior on left button press
+#         return
+
+
+# def main():
+#     colors = vtk.vtkNamedColors()
+
+#     # Load image
+#     reader = vtk.vtkMetaImageReader()
+#     reader.SetFileName("out.mhd")
+#     reader.Update()
+
+#     # Create renderers
+#     renderer_left = vtk.vtkRenderer()
+#     renderer_left.SetViewport(0.0, 0.0, 1.0, 1.0)  # Left half of the render window
+#     renderer_left.SetBackground(colors.GetColor3d("NavajoWhite"))
+
+#     # Setup render window.
+#     render_window = vtk.vtkRenderWindow()
+#     render_window.SetSize(1200, 600)  # Double width to accommodate two renderers
+#     render_window.AddRenderer(renderer_left)
+#     render_window.SetWindowName("Image Slicing")
+
+#     renderer_left.ResetCamera()
+
+#     # Setup render window interactor.
+#     render_window_interactor = vtk.vtkRenderWindowInteractor()
+#     render_window_interactor.SetRenderWindow(render_window)
+
+#     # Set the custom interactor style
+#     custom_interactor_style = CustomInteractorStyle()
+#     render_window_interactor.SetInteractorStyle(custom_interactor_style)
+
+#     # Create cutting plane widget
+#     cutting_plane_widget = vtk.vtkImagePlaneWidget()
+#     cutting_plane_widget.SetInputConnection(reader.GetOutputPort())
+#     cutting_plane_widget.SetInteractor(render_window_interactor)
+#     cutting_plane_widget.DisplayTextOn()
+#     cutting_plane_widget.SetPlaneOrientationToZAxes()  # Initial orientation to Z axes
+#     cutting_plane_widget.On()
+
+#     # Initialize variables for dragging
+#     start_position = None
+
+#     def drag_cutting_plane(widget, event):
+#         nonlocal start_position
+
+#         if start_position is not None:
+#             # Get current cursor position
+#             current_position = render_window_interactor.GetEventPosition()
+
+#             # Calculate the displacement
+#             displacement = [current_position[i] - start_position[i] for i in range(2)]
+
+#             # Move the cutting plane
+#             cutting_plane_widget.GetPlaneProperty().AddObserver(
+#                 vtk.vtkCommand.ModifiedEvent, update_cutting_plane
+#             )
+#             cutting_plane_widget.UpdatePlacement()
+#             cutting_plane_widget.GetPlaneProperty().RemoveObservers(
+#                 vtk.vtkCommand.ModifiedEvent
+#             )
+
+#             # Update the start position for the next event
+#             start_position = current_position
+
+#             # Update the render window
+#             render_window.Render()
+
+#     def stop_dragging(widget, event):
+#         nonlocal start_position
+#         if event == "LeftButtonReleaseEvent":
+#             start_position = None
+
+#     def update_cutting_plane(obj, event):
+#         cutting_plane_widget.UpdatePlacement()
+
+#     # Add observers for dragging events
+#     render_window_interactor.AddObserver(
+#         vtk.vtkCommand.LeftButtonPressEvent, start_dragging
+#     )
+#     render_window_interactor.AddObserver(
+#         vtk.vtkCommand.MouseMoveEvent, drag_cutting_plane
+#     )
+#     render_window_interactor.AddObserver(
+#         vtk.vtkCommand.LeftButtonReleaseEvent, stop_dragging
+#     )
+
+#     # Create image slice actor and mapper for the original image
+#     image_slice_mapper_left = vtk.vtkOpenGLImageSliceMapper()
+#     image_slice_mapper_left.SetInputConnection(reader.GetOutputPort())
+#     image_slice_mapper_left.SliceAtFocalPointOn()  # Set slice orientation at focal point
+
+#     image_slice_actor_left = vtk.vtkImageSlice()
+#     image_slice_actor_left.SetMapper(image_slice_mapper_left)
+
+#     # Add the image slice actor to the left renderer
+#     renderer_left.AddActor(image_slice_actor_left)
+
+#     # Set the opacity of the original image to 0 in the right renderer
+#     image_slice_actor_left.GetProperty().SetOpacity(0)
+
+#     # Render and start interaction.
+#     render_window.Render()
+#     render_window_interactor.Start()
+
+
+# if __name__ == "__main__":
+#     main()
