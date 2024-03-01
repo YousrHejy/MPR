@@ -1,124 +1,105 @@
 import vtk
 
-
-def setMHDPath():
-    # TODO : setup a dialog box to set fileName
-    fileName = "out.mhd"
-    print(fileName)
-    return fileName
-
+def readFiles(filename):
+    readDICOM = vtk.vtkMetaImageReader()
+    readDICOM.SetFileName(filename)
+    readDICOM.Update()
+    image = readDICOM.GetOutput()
+    dimensions = image.GetDimensions()
+    scalarRange = image.GetScalarRange()
+    return dimensions, scalarRange, image
+def mainWindow():
+    # Define main renderer window
+    renderWindow = vtk.vtkRenderWindow()
+    renderWindow.SetSize(1000, 1000)
+    renderWindow.BordersOn()
+    return renderWindow
+def interaction(window):
+    # Define interactor and interactor style
+    renderWindowInteractor = vtk.vtkRenderWindowInteractor()
+    renderWindowStyle = vtk.vtkInteractorStyleTrackballCamera()
+    renderWindowInteractor.SetInteractorStyle(renderWindowStyle)
+    # define selected scene for interacrion
+    renderWindowInteractor.SetRenderWindow(window)
+    picker = vtk.vtkCellPicker()
+    picker.SetTolerance(0.005)
+    renderWindowInteractor.SetPicker(picker)
+    renderWindowInteractor.GetPickingManager().SetEnabled(1)
+    renderWindowInteractor.GetPickingManager().AddPicker(picker)
+    renderWindowInteractor.Initialize()
+    return renderWindowInteractor
+def createRenders(xmin,ymin,xmax,ymax,renderWindow,renders):
+    render = vtk.vtkRenderer()
+    renderWindow.AddRenderer(render)
+    render.SetViewport(xmin, ymin, xmax, ymax)
+    renders.append(render)
 
 if __name__ == "__main__":
     # thresholds for volume rendering
     thresh1 = 150
     thresh2 = 320
     thresh3 = 440
-
-    nbDim = 3
-
-    # Reading dicom
-    myFile = setMHDPath()
-    readDICOM = vtk.vtkMetaImageReader()
-    readDICOM.SetFileName(myFile)
-    readDICOM.Update()
-    myMHD = readDICOM.GetOutput()
-
-    wholeExtent = myMHD.GetDimensions()
-    scalarRange = myMHD.GetScalarRange()
-
-    # Define main Renderer window and interactor
-    renWin = vtk.vtkRenderWindow()
-    renWin.SetSize(1000, 1000)
-    renWin.BordersOn()
-
-    iren = vtk.vtkRenderWindowInteractor()
-    # irenStyle = vtk.vtkInteractorStyleImage()
-    irenStyle = vtk.vtkInteractorStyleTrackballCamera()
-    iren.SetInteractorStyle(irenStyle)
-    picker = vtk.vtkCellPicker()
-    picker.SetTolerance(0.005)
-    iren.SetRenderWindow(renWin)
-    iren.SetPicker(picker)
-    iren.GetPickingManager().SetEnabled(1)
-    iren.GetPickingManager().AddPicker(picker)
-    iren.Initialize()
-
-    # Define viewport ranges in renderwindow
+    # no of slices
+    # # Define viewport ranges in renderwindow
     xmins = [0, 0.51, 0, 0.51]
     xmaxs = [0.49, 1, 0.49, 1]
     ymins = [0, 0, 0.51, 0.51]
     ymaxs = [0.49, 0.49, 1, 1]
-
-    # TODO : confirm if this camera orientation is good for 3D echo
+    dimensionsNumber = 3
+    wholeExtent, scalarRange, myMHD = readFiles("out.mhd")
+    renderWindow = mainWindow()
+    renderWindowInteractor = interaction(renderWindow)
+    # # TODO : confirm if this camera orientation is good for 3D echo
     viewUp = [[0, 0, -1], [0, 0, -1], [0, 1, 0]]
-
-    # Define 3 MPR views using image plane widgets and reslice cursor
+    # # Define 3 MPR views using image plane widgets and reslice cursor
     ipws = []
-    rens = []
+    renders = []
     rcws = []
     rcwReps = []
-
     # First renderer, used to display volume3D or slice planes in 3D
-    firstRen = vtk.vtkRenderer()
-    rens.append(firstRen)
-    renWin.AddRenderer(firstRen)
-    firstRen.SetViewport(xmins[3], ymins[3], xmaxs[3], ymaxs[3])
-
+    createRenders(xmins[3], ymins[3], xmaxs[3], ymaxs[3], renderWindow, renders)
     # Reslice cursor generating the 3 slice planes
     resliceCursor = vtk.vtkResliceCursor()
     resliceCursor.SetCenter(myMHD.GetCenter())
-    resliceCursor.SetThickMode(0)
-    # resliceCursor.SetThickness(20, 20, 20)
     resliceCursor.SetImage(myMHD)
-
-    for i in range(nbDim):
-        # One renderer for each slice orientation
-        ren = vtk.vtkRenderer()
-        rens.append(ren)
-        renWin.AddRenderer(ren)
-        ren.SetViewport(xmins[i], ymins[i], xmaxs[i], ymaxs[i])
-
+    # # Enable the cursor by default
+    for i in range(dimensionsNumber):
+        createRenders(xmins[i], ymins[i], xmaxs[i], ymaxs[i], renderWindow, renders)
         # One vtkResliceCursorWidget for each slice orientation, based on common Reslice cursor
-        rcw = vtk.vtkResliceCursorWidget()
-        rcws.append(rcw)
-        rcw.SetInteractor(iren)
-
         rcwRep = vtk.vtkResliceCursorThickLineRepresentation()
-        rcwReps.append(rcwRep)
         rcwRep.SetRestrictPlaneToVolume(1)
-        rcw.SetRepresentation(rcwRep)
+        rcwReps.append(rcwRep)
         rcwRep.GetResliceCursorActor().GetCursorAlgorithm().SetResliceCursor(
             resliceCursor
         )
-        rcwRep.GetResliceCursorActor().GetCursorAlgorithm().SetReslicePlaneNormal(i)
-        rcwRep.ManipulationMode = 2
-
-        rcw.SetDefaultRenderer(ren)
+        renders[i+1].AddActor(rcwRep.GetResliceCursorActor().GetCursorAlgorithm().SetReslicePlaneNormal(i))
+        rcwRep.ManipulationMode = 3
+        rcw = vtk.vtkResliceCursorWidget()
+        rcws.append(rcw)
+        rcw.SetInteractor(renderWindowInteractor)
+        rcw.SetRepresentation(rcwRep)
+        rcw.SetDefaultRenderer(renders[i+1])
         rcw.SetEnabled(1)
-
         # Setting right camera orientation
-        ren.GetActiveCamera().SetFocalPoint(0, 0, 0)
+        renders[i+1].GetActiveCamera().SetFocalPoint(0, 0, 0)
         camPos = [0, 0, 0]
         camPos[i] = 1
-        ren.GetActiveCamera().SetPosition(camPos)
-        ren.GetActiveCamera().ParallelProjectionOn()
-        ren.GetActiveCamera().SetViewUp(viewUp[i])
-        ren.ResetCamera()
-
+        renders[i+1].GetActiveCamera().SetPosition(camPos)
+        renders[i+1].GetActiveCamera().ParallelProjectionOn()
+        renders[i+1].GetActiveCamera().SetViewUp(viewUp[i])
+        renders[i+1].ResetCamera()
         # Initialize the window level to a sensible value
         rcwRep.SetWindowLevel(
             scalarRange[1] - scalarRange[0], (scalarRange[0] + scalarRange[1]) / 2.0
         )
-
-        # Make all slice plane share the same color map.
+    #     # Make all slice plane share the same color map.
         rcwRep.SetLookupTable(rcwReps[0].GetLookupTable())
-
+    #
         rcw.On()
-
-    # 3D Raycast Viewer
+    # # 3D Raycast Viewer
     colorTransferFunction = vtk.vtkColorTransferFunction()
     colorTransferFunction.AddRGBPoint(scalarRange[0], 0.0, 0.0, 0.0)
-    colorTransferFunction.AddRGBPoint(thresh1, 140 / 255, 64 / 255, 38 / 255)
+    colorTransferFunction.AddRGBPoint(thresh1, 100 / 255, 64 / 255, 38 / 255)
     colorTransferFunction.AddRGBPoint(thresh2, 225 / 255, 154 / 255, 74 / 255)
     colorTransferFunction.AddRGBPoint(thresh3, 255 / 255, 239 / 255, 243 / 255)
     colorTransferFunction.AddRGBPoint(scalarRange[1], 211 / 255, 168 / 255, 255 / 255)
@@ -149,10 +130,9 @@ if __name__ == "__main__":
     actorVolume.SetMapper(volumeMapper)
     actorVolume.SetProperty(volumeProperty)  # Define renderer for Volume
 
-    rens[0].SetBackground(255 / 255, 255 / 255, 255 / 255)
-    rens[0].AddVolume(actorVolume)
-    rens[0].ResetCameraClippingRange()
-
-    renWin.Render()
-
-    iren.Start()
+    renders[0].SetBackground(255 / 255, 255 / 255, 255 / 255)
+    renders[0].AddVolume(actorVolume)
+    renders[0].ResetCameraClippingRange()
+    #
+    renderWindow.Render()
+    renderWindowInteractor.Start()
