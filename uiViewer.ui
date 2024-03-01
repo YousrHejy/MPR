@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -48,17 +48,6 @@
         <attribute name="label">
          <string>General</string>
         </attribute>
-        <widget class="QWidget" name="verticalLayoutWidget">
-         <property name="geometry">
-          <rect>
-           <x>-10</x>
-           <y>480</y>
-           <width>323</width>
-           <height>121</height>
-          </rect>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3"/>
-        </widget>
         <widget class="QWidget" name="verticalLayoutWidget_3">
          <property name="geometry">
           <rect>
@@ -139,32 +128,18 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="horizontalLayoutWidget_4">
+        <widget class="QWidget" name="verticalLayoutWidget_9">
          <property name="geometry">
           <rect>
-           <x>-30</x>
-           <y>280</y>
-           <width>321</width>
-           <height>119</height>
+           <x>0</x>
+           <y>270</y>
+           <width>191</width>
+           <height>121</height>
           </rect>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <layout class="QVBoxLayout" name="verticalLayout_13">
           <item>
-           <widget class="QPushButton" name="btn_play">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Play</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="l1_2">
+           <widget class="QLabel" name="l3_3">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -181,32 +156,50 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_pause">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Pause</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btn_stop">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Stop</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QPushButton" name="btn_play">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Play</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_pause">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Pause</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_stop">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Stop</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
